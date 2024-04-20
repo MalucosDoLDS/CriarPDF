@@ -23,8 +23,15 @@
             estadoAtualDocumento = true;
             TraducaoPronta(numPaginas);
         }
-        public void SolicitarPaginaAtual(ref string pagina) {
+        public void SolicitarPaginaAtual(ref string pagina) 
+
+
+
+        {
+
+           // ola pessoal
             // Fornece o texto traduzido da página atual
+
             // colocando-o em "pagina" porque foi passada com ref
             pagina = "Esta será a página atual da tradução";
         }
