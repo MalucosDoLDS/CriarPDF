@@ -11,6 +11,6 @@ namespace CriarPDF {
             controller.IniciarPrograma();
         }
 
-        // ola pessoal
+        
     }
 }
