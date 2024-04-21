@@ -14,7 +14,7 @@
         public Model() {
             estadoAtualDocumento = false;
         }
-
+        //teste
         public void Traduzir(string texto) {
             // Traduzir o texto para chinês e guardá-lo
             // Notifica que a tradução está pronta;
