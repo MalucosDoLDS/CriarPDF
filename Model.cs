@@ -24,8 +24,7 @@
             TraducaoPronta(numPaginas);
         }
         public void SolicitarPaginaAtual(ref string pagina) 
-
-
+//teste 2 cesar
 
         {
 
