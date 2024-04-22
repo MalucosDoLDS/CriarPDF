@@ -1,41 +1,59 @@
 ﻿using System;
 
-namespace CriarPDF {
-    class View {
-
+namespace CriarPDF
+{
+    class View
+    {
         public delegate void SolicitacaoPaginaAtual(ref string pagina);
-        public event SolicitacaoPaginaAtual PrecisoDaPaginaAtual;
+        public event SolicitacaoPaginaAtual? PrecisoDaPaginaAtual;
 
-        public View() {
+        public delegate void SolicitacaoGerarPDF(string texto);
+        public event SolicitacaoGerarPDF? PrecisaGerarPDF;
+
+        public View() { }
+
+        public void ApresentarBoasVindas()
+        {
+            Console.WriteLine("Bem-vindo ao tradutor do Quarto Chinês!");
         }
 
-        public void ApresentarBoasVindas() {
-            Console.WriteLine("Bem vindo ao tradutor do Quarto Chinês!");
-        }
-
-        public void MostrarTraducao(int nPaginas) {
-            //Obtém a página atual
-            string pagina="";
-            PrecisoDaPaginaAtual(ref pagina);
-            //Colocá-la no ecrã.
-            Console.WriteLine(pagina);
-            Console.WriteLine("Prima qualquer tecla para continuar");
-        }
-
-        public void ApresentarRotuloPrompt() {
-            Console.WriteLine("Digite o texto a traduzir");
+        public void ApresentarRotuloPrompt()
+        {
+            Console.WriteLine("Digite o texto a traduzir:");
             Console.Write("> ");
         }
 
-        public void ApresentarRotuloTraducao() {
-            Console.WriteLine("Texto traduzido:");
+        public string DigitarInformacoes()
+        {
+            return Console.ReadLine();
         }
 
-        public void PaginaAtualMudou() {
-            MostrarTraducao(1);
+        public string? SolicitarCaminhoPDF()
+        {
+            Console.WriteLine("Por favor, insira o caminho onde deseja salvar o arquivo PDF:");
+            Console.Write("> ");
+            string path = Console.ReadLine();
+            return path; // Retorna null se o caminho for nulo
         }
 
-        public void MostrarMSGFinal() { // ... 
+        public void ExibirPDFGerado(string path)
+        {
+            Console.WriteLine($"PDF criado com sucesso em: {path}");
+        }
+
+        // Método para iniciar o processo de gerar PDF
+        public void GerarPDF(string texto)
+        {
+            PrecisaGerarPDF?.Invoke(texto);
+        }
+
+        // Método para obter a página atual para mostrar
+        public void MostrarTraducao(ref string traducao)
+        {
+            if (traducao != null)
+            {
+                PrecisoDaPaginaAtual?.Invoke(ref traducao);
+            }
         }
     }
 }
