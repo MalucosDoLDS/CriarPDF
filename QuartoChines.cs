@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CriarPDF {
-    class QuartoChines {
-        static void Main(string[] args) {
-            Controller controller = new Controller();
-            controller.IniciarPrograma();
+namespace CriarPDF
+{
+    class QuartoChines
+    {
+        static void Main(string[] args)
+        {
+            View view = new View(); // Certifique-se de que a classe View está definida corretamente
+            Model model = new Model(); // Certifique-se de que a classe Model está definida corretamente
+            Controller controller = new Controller(view, model); // Passar as instâncias de View e Model para o construtor de Controller
+            controller.Iniciar(); // Corrigido para chamar o método Iniciar, conforme definido na classe Controller
         }
-
-        // ola pessoal PDF
     }
 }
+

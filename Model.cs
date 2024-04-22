@@ -1,46 +1,57 @@
-﻿namespace CriarPDF {
-    class Model {
+﻿using System;
+using PdfSharp.Pdf;
+using PdfSharp.Drawing;
 
+namespace CriarPDF
+{
+    class Model
+    {
         private bool estadoAtualDocumento;
-        
-        public bool EstadoAtualDocumento { get => estadoAtualDocumento; }
 
-        public delegate void EnvioTraducaoPronta(int nPaginas);
-        public event EnvioTraducaoPronta TraducaoPronta;
-        public delegate void NotificarOcorrencia();
-        public event NotificarOcorrencia PaginaAtualMudou;
-        public event NotificarOcorrencia DocumentoTerminou;
-
-        public Model() {
+        public Model()
+        {
             estadoAtualDocumento = false;
         }
-//cesar teste
-        public void Traduzir(string texto) {
-            // Traduzir o texto para chinês e guardá-lo
-            // Notifica que a tradução está pronta;
-            // Como é um evento, o model não sabe quem o receberá (isso é definido no Controller)
-            int numPaginas = 0;
-            estadoAtualDocumento = true;
-            TraducaoPronta(numPaginas);
-        }
-        public void SolicitarPaginaAtual(ref string pagina) 
-//teste 2 cesar
 
+        public void GerarPDF(string texto, string caminho)
         {
+            // Criando um novo documento PDF
+            PdfDocument document = new PdfDocument();
 
-           // ola pessoal
-            // Fornece o texto traduzido da página atual
+            // Adicionando uma página ao documento
+            PdfPage page = document.AddPage();
 
-            // colocando-o em "pagina" porque foi passada com ref
-            pagina = "Esta será a página atual da tradução";
+            // Obtendo um objeto XGraphics para desenhar na página
+            XGraphics gfx = XGraphics.FromPdfPage(page);
+
+            // Criando um objeto XFont para usar na página com o estilo Regular
+            XFont font = new XFont("Verdana", 20); // Definindo a fonte como Verdana e o tamanho como 20
+
+            // Desenhando o texto na página
+            gfx.DrawString(texto, font, XBrushes.Black,
+                new XRect(0, 0, page.Width, page.Height),
+                XStringFormats.Center);
+
+            // Salvando o documento PDF no caminho fornecido
+            document.Save(caminho);
+
+            // Indicando que o PDF foi gerado com sucesso
+            estadoAtualDocumento = true;
+
+            Console.WriteLine($"PDF gerado e salvo em: {caminho}");
         }
-        public void AvancarPagina() {
-            // Avança para a próxima página traduzida
-            // estadoAtualDocumento regista sucesso (true) ou fim (false)
-            if (estadoAtualDocumento)
-                PaginaAtualMudou();
-            else
-                DocumentoTerminou();
+
+        public void SolicitarPaginaAtual(ref string pagina)
+        {
+            // Simulação da obtenção da página atual
+            pagina = "Conteúdo da página atual";
+        }
+
+        public bool DocumentoFoiGerado()
+        {
+            return estadoAtualDocumento;
         }
     }
 }
+
+
