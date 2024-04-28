@@ -2,7 +2,7 @@
 
 namespace CriarPDF
 {
-    class QuartoChines
+    class MainPDF
     {
         static void Main(string[] args)
         {
