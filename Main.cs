@@ -11,7 +11,7 @@ namespace CriarPDF
             Controller controller = new Controller(view, model); // Passar as instâncias de View e Model para o construtor de Controller
             controller.Iniciar(); // Corrigido para chamar o método Iniciar, conforme definido na classe Controller
         }
-
+        //teste
 
     }
 }
