@@ -10,48 +10,43 @@ namespace CriarPDF
 
         public Model()
         {
-            estadoAtualDocumento = false;
+            estadoAtualDocumento = false;  // Inicializa o estado do documento como não gerado.
         }
 
-        public void GerarPDF(string texto, string caminho)
+        // Método para gerar um PDF com o texto fornecido e salvar no caminho especificado.
+        public bool GerarPDF(string texto, string caminho)
         {
-            // Criando um novo documento PDF
-            PdfDocument document = new PdfDocument();
+            try
+            {
+                PdfDocument document = new PdfDocument();
+                PdfPage page = document.AddPage();
+                XGraphics gfx = XGraphics.FromPdfPage(page);
 
-            // Adicionando uma página ao documento
-            PdfPage page = document.AddPage();
+                // Combinação manual de estilos de fonte para simular "BoldItalic"
+                XFont font = new XFont("Verdana", 20);
 
-            // Obtendo um objeto XGraphics para desenhar na página
-            XGraphics gfx = XGraphics.FromPdfPage(page);
-
-            // Criando um objeto XFont para usar na página com o estilo Regular
-            XFont font = new XFont("Verdana", 20); // Definindo a fonte como Verdana e o tamanho como 20
-
-            // Desenhando o texto na página
-            gfx.DrawString(texto, font, XBrushes.Black,
-                new XRect(0, 0, page.Width, page.Height),
-                XStringFormats.Center);
-
-            // Salvando o documento PDF no caminho fornecido
-            document.Save(caminho);
-
-            // Indicando que o PDF foi gerado com sucesso
-            estadoAtualDocumento = true;
-
-            Console.WriteLine($"PDF gerado e salvo em: {caminho}");
+                gfx.DrawString(texto, font, XBrushes.Black, new XRect(0, 0, page.Width, page.Height), XStringFormats.Center);
+                document.Save(caminho);
+                estadoAtualDocumento = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Failed to generate PDF: {ex.Message}");
+                return false;
+            }
         }
 
+        // Método para obter uma simulação de conteúdo de página, útil para testes.
         public void SolicitarPaginaAtual(ref string pagina)
         {
-            // Simulação da obtenção da página atual
             pagina = "Conteúdo da página atual";
         }
 
+        // Método para verificar se um documento PDF foi gerado.
         public bool DocumentoFoiGerado()
         {
             return estadoAtualDocumento;
         }
     }
 }
-
-
