@@ -1,6 +1,5 @@
 ﻿using System;
 using PdfSharp.Pdf;
-using System.IO;
 using PdfSharp.Drawing;
 
 namespace CriarPDF
@@ -14,30 +13,40 @@ namespace CriarPDF
             estadoAtualDocumento = false;  // Inicializa o estado do documento como não gerado.
         }
 
-        // Método para gerar um PDF com o texto fornecido e salvar no caminho especificado.
-        public bool GerarPDF(string texto, string nomeDoArquivo)
+        // Método para gerar um PDF com o texto fornecido, utilizando o tipo de letra escolhido, e salvar no caminho especificado.
+        public bool GerarPDF(string texto, string caminho, string tipoDeLetra)
         {
             try
             {
-                // Constrói o caminho para a pasta Downloads
-                string downloadsPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                string fullPath = Path.Combine(downloadsPath, "Downloads", nomeDoArquivo + ".pdf");
-
                 PdfDocument document = new PdfDocument();
                 PdfPage page = document.AddPage();
                 XGraphics gfx = XGraphics.FromPdfPage(page);
 
-                // Combinação manual de estilos de fonte para simular "BoldItalic"
-                XFont font = new XFont("Verdana", 20);
+                XFont font;
+                switch (tipoDeLetra)
+                {
+                    case "1":
+                        font = new XFont("Verdana", 20);
+                        break;
+                    case "2":
+                        font = new XFont("Arial", 20);
+                        break;
+                    case "3":
+                        font = new XFont("Times New Roman", 20);
+                        break;
+                    default:
+                        font = new XFont("Arial", 20); // Padrão para Arial se a escolha não for reconhecida
+                        break;
+                }
 
                 gfx.DrawString(texto, font, XBrushes.Black, new XRect(0, 0, page.Width, page.Height), XStringFormats.Center);
-                document.Save(fullPath);
+                document.Save(caminho);
                 estadoAtualDocumento = true;
                 return true;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Failed to generate PDF: {ex.Message}");
+                Console.Error.WriteLine($"Falha ao gerar o PDF: {ex.Message}");
                 return false;
             }
         }
@@ -55,3 +64,4 @@ namespace CriarPDF
         }
     }
 }
+

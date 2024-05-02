@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using PdfSharp.Pdf;
-using PdfSharp.Drawing;
 
 namespace CriarPDF
 {
@@ -22,11 +20,12 @@ namespace CriarPDF
             try
             {
                 string texto = view.DigitarInformacoes();
+                string tipoDeLetraEscolhido = view.EscolherTipoDeLetra(); // Solicita ao usuário que escolha o tipo de letra
                 string caminho = view.SolicitarCaminhoPDF();
 
                 if (ValidarCaminho(caminho))
                 {
-                    bool success = model.GerarPDF(texto, caminho);
+                    bool success = model.GerarPDF(texto, caminho, tipoDeLetraEscolhido); // Passa o tipo de letra escolhido para o método GerarPDF do Model
                     if (success)
                     {
                         view.ExibirPDFGerado(caminho);
