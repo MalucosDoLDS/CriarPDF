@@ -8,6 +8,7 @@ namespace CriarPDF
         public event SolicitacaoGerarPDF? PrecisaGerarPDF;
 
         public View() { }
+
         public string SolicitarCaminhoPDF()
         {
             Console.WriteLine("Por favor, insira o caminho onde deseja salvar o arquivo PDF:");
@@ -68,5 +69,19 @@ namespace CriarPDF
         {
             PrecisaGerarPDF?.Invoke(texto);
         }
+
+        // Método para permitir ao usuário escolher o tipo de letra para o PDF.
+        public string EscolherTipoDeLetra()
+        {
+            Console.WriteLine("Escolha o tipo de letra para o PDF:");
+            Console.WriteLine("1. Verdana");
+            Console.WriteLine("2. Arial");
+            Console.WriteLine("3. Times New Roman");
+            Console.Write("> ");
+
+            string escolha = Console.ReadLine();
+            return escolha;
+        }
     }
 }
+
