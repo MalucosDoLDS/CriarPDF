@@ -1,5 +1,6 @@
 ﻿using System;
 using PdfSharp.Pdf;
+using System.IO;
 using PdfSharp.Drawing;
 
 namespace CriarPDF
@@ -14,10 +15,14 @@ namespace CriarPDF
         }
 
         // Método para gerar um PDF com o texto fornecido e salvar no caminho especificado.
-        public bool GerarPDF(string texto, string caminho)
+        public bool GerarPDF(string texto, string nomeDoArquivo)
         {
             try
             {
+                // Constrói o caminho para a pasta Downloads
+                string downloadsPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                string fullPath = Path.Combine(downloadsPath, "Downloads", nomeDoArquivo + ".pdf");
+
                 PdfDocument document = new PdfDocument();
                 PdfPage page = document.AddPage();
                 XGraphics gfx = XGraphics.FromPdfPage(page);
@@ -26,7 +31,7 @@ namespace CriarPDF
                 XFont font = new XFont("Verdana", 20);
 
                 gfx.DrawString(texto, font, XBrushes.Black, new XRect(0, 0, page.Width, page.Height), XStringFormats.Center);
-                document.Save(caminho);
+                document.Save(fullPath);
                 estadoAtualDocumento = true;
                 return true;
             }
