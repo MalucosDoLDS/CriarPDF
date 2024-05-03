@@ -12,20 +12,24 @@ namespace CriarPDF
         {
             this.view = view;
             this.model = model;
+            this.view.PrecisaGerarPDF += GerarPDF;
         }
 
         public void Iniciar()
         {
             view.ApresentarBoasVindas();
+            view.GerarPDF();
+        }
+
+        private void GerarPDF(string texto, string tipoDeLetra, int tamanhoFonte, string cor)
+        {
             try
             {
-                string texto = view.DigitarInformacoes();
-                string tipoDeLetraEscolhido = view.EscolherTipoDeLetra(); // Solicita ao usuário que escolha o tipo de letra
                 string caminho = view.SolicitarCaminhoPDF();
 
                 if (ValidarCaminho(caminho))
                 {
-                    bool success = model.GerarPDF(texto, caminho, tipoDeLetraEscolhido); // Passa o tipo de letra escolhido para o método GerarPDF do Model
+                    bool success = model.GerarPDF(texto, caminho, tipoDeLetra, tamanhoFonte, cor);
                     if (success)
                     {
                         view.ExibirPDFGerado(caminho);
@@ -52,3 +56,4 @@ namespace CriarPDF
         }
     }
 }
+

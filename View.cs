@@ -1,10 +1,11 @@
 ﻿using System;
+using System.IO;
 
 namespace CriarPDF
 {
     class View
     {
-        public delegate void SolicitacaoGerarPDF(string texto);
+        public delegate void SolicitacaoGerarPDF(string texto, string tipoDeLetra, int tamanhoFonte, string cor);
         public event SolicitacaoGerarPDF? PrecisaGerarPDF;
 
         public View() { }
@@ -39,13 +40,6 @@ namespace CriarPDF
         }
 
         // Método para solicitar ao usuário que digite o texto para incluir no PDF.
-        public void SolicitarTextoParaPDF()
-        {
-            Console.WriteLine("Digite o texto para o PDF:");
-            Console.Write("> ");
-        }
-
-        // Método para ler as informações inseridas pelo usuário e garantir que a entrada é válida.
         public string DigitarInformacoes()
         {
             Console.WriteLine("Digite o texto para o PDF:");
@@ -65,23 +59,46 @@ namespace CriarPDF
         }
 
         // Método para iniciar o processo de gerar um PDF a partir do texto fornecido.
-        public void GerarPDF(string texto)
+        public void GerarPDF()
         {
-            PrecisaGerarPDF?.Invoke(texto);
+            string texto = DigitarInformacoes();
+            string caminho = SolicitarCaminhoPDF();
+            (string tipoDeLetraEscolhido, int tamanhoFonte, string cor) = EscolherTipoDeLetraTamanhoECor();
+
+            PrecisaGerarPDF?.Invoke(texto, tipoDeLetraEscolhido, tamanhoFonte, cor);
         }
 
-        // Método para permitir ao usuário escolher o tipo de letra para o PDF.
-        public string EscolherTipoDeLetra()
+        // Método para escolher o tipo de letra, tamanho da fonte e cor.
+        private (string, int, string) EscolherTipoDeLetraTamanhoECor()
         {
-            Console.WriteLine("Escolha o tipo de letra para o PDF:");
+            Console.WriteLine("Escolha o tipo de letra, o tamanho e a cor para o PDF:");
             Console.WriteLine("1. Verdana");
             Console.WriteLine("2. Arial");
             Console.WriteLine("3. Times New Roman");
-            Console.Write("> ");
+            Console.Write("Tipo de letra (1-3): ");
+            string tipoDeLetraEscolhido = Console.ReadLine();
 
-            string escolha = Console.ReadLine();
-            return escolha;
+            Console.Write("Tamanho da fonte (até 120): ");
+            int tamanhoFonte;
+            while (!int.TryParse(Console.ReadLine(), out tamanhoFonte) || tamanhoFonte <= 0 || tamanhoFonte > 120)
+            {
+                Console.WriteLine("Tamanho de fonte inválido. Por favor, insira um valor entre 1 e 120:");
+            }
+
+            Console.WriteLine("Escolha a cor para o PDF:");
+            Console.WriteLine("1. Preto");
+            Console.WriteLine("2. Cinza");
+            Console.WriteLine("3. Verde");
+            Console.WriteLine("4. Laranja");
+            Console.WriteLine("5. Amarelo");
+            Console.WriteLine("6. Rosa");
+            Console.WriteLine("7. Vermelho");
+            Console.WriteLine("8. Castanho");
+            Console.WriteLine("9. Azul");
+            Console.Write("Cor (1-9): ");
+            string cor = Console.ReadLine();
+
+            return (tipoDeLetraEscolhido, tamanhoFonte, cor);
         }
     }
 }
-
