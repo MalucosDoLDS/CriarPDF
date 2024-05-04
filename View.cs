@@ -17,14 +17,21 @@ namespace CriarPDF
             string texto = DigitarInformacoes();
             (string tipoDeLetraEscolhido, int tamanhoFonte, string cor) = EscolherTipoDeLetraTamanhoECor();
 
+            if (DesejaAcrescentarMaisTexto())
+            {
+                texto += "\n" + DigitarInformacoesAdicionais();
+            }
+
             string caminho = SolicitarCaminhoPDF(); // Pergunta sobre o caminho no final
 
             PrecisaGerarPDF?.Invoke(texto, tipoDeLetraEscolhido, tamanhoFonte, cor, caminho);
         }
 
-        public void ExibirPDFGerado(string caminho)
+        private bool DesejaAcrescentarMaisTexto()
         {
-            Console.WriteLine($"PDF criado com sucesso em: {caminho}");
+            Console.WriteLine("Deseja acrescentar mais algum texto? (S/N)");
+            string resposta = Console.ReadLine().ToUpper();
+            return resposta == "S";
         }
 
         private string SolicitarCaminhoPDF()
@@ -37,6 +44,12 @@ namespace CriarPDF
         private string DigitarInformacoes()
         {
             Console.WriteLine("Digite o texto para o PDF:");
+            return Console.ReadLine();
+        }
+
+        private string DigitarInformacoesAdicionais()
+        {
+            Console.WriteLine("Digite o texto adicional para o PDF:");
             return Console.ReadLine();
         }
 
@@ -70,6 +83,11 @@ namespace CriarPDF
             string cor = Console.ReadLine();
 
             return (tipoDeLetraEscolhido, tamanhoFonte, cor);
+        }
+
+        public void ExibirPDFGerado(string caminho)
+        {
+            Console.WriteLine($"PDF criado com sucesso em: {caminho}");
         }
     }
 }
