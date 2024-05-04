@@ -19,11 +19,11 @@ namespace CriarPDF
 
             if (DesejaAcrescentarMaisTexto())
             {
-                texto += "\n" + DigitarInformacoesAdicionais();
+                texto += "\n";
+                texto += DigitarInformacoesAdicionais();
             }
 
-            string caminho = SolicitarCaminhoPDF(); // Pergunta sobre o caminho no final
-
+            string caminho = SolicitarCaminhoPDF();
             PrecisaGerarPDF?.Invoke(texto, tipoDeLetraEscolhido, tamanhoFonte, cor, caminho);
         }
 
@@ -36,7 +36,7 @@ namespace CriarPDF
 
         private string SolicitarCaminhoPDF()
         {
-            Console.WriteLine("Por favor, insira o caminho onde deseja salvar o arquivo PDF:");
+            Console.WriteLine("Por favor, insira o caminho onde deseja salvar o arquivo PDF, escreva <nome>.pdf':");
             Console.Write("> ");
             return Console.ReadLine();
         }
@@ -55,7 +55,7 @@ namespace CriarPDF
 
         private (string, int, string) EscolherTipoDeLetraTamanhoECor()
         {
-            Console.WriteLine("Escolha o tipo de letra, o tamanho e a cor para o PDF:");
+            Console.WriteLine("Escolha o tipo de letra para o PDF:");
             Console.WriteLine("1. Verdana");
             Console.WriteLine("2. Arial");
             Console.WriteLine("3. Times New Roman");
