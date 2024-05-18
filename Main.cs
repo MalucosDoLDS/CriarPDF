@@ -66,9 +66,9 @@ namespace CriarPDF
             // Configure o resolver de fontes antes de qualquer outra operação
             GlobalFontSettings.FontResolver = fontResolver;
 
-            View view = new View(); // Certifique-se de que a classe View está definida corretamente
-            Model model = new Model(); // Certifique-se de que a classe Model está definida corretamente
-            Controller controller = new Controller(view, model); // Passar as instâncias de View e Model para o construtor de Controller
+            IView view = new View(); // Utilizamos a interface IView em vez da classe concreta View
+            IModel model = new Model(); // Utilizamos a interface IModel em vez da classe concreta Model
+            Controller controller = new Controller(view, model); // Passamos objetos que implementam as interfaces IView e IModel
             controller.Iniciar(); // Inicia o fluxo do programa através do Controller
         }
     }

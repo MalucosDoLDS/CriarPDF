@@ -3,12 +3,12 @@ using System.IO;
 
 namespace CriarPDF
 {
-    class Controller
+    public class Controller
     {
-        private View view;
-        private Model model;
+        private IView view;
+        private IModel model;
 
-        public Controller(View view, Model model)
+        public Controller(IView view, IModel model)
         {
             this.view = view;
             this.model = model;
@@ -28,10 +28,16 @@ namespace CriarPDF
             }
         }
 
-        private void GerarPDF(string texto, string tipoDeLetra, int tamanhoFonte, string cor, string caminho)
+        private void GerarPDF(object sender, SolicitacaoGerarPDFEventArgs e)
         {
             try
             {
+                string texto = e.Texto;
+                string tipoDeLetra = e.TipoDeLetra;
+                int tamanhoFonte = e.TamanhoFonte;
+                string cor = e.Cor;
+                string caminho = e.Caminho;
+
                 if (ValidarCaminho(caminho))
                 {
                     bool success = model.GerarPDF(texto, caminho, tipoDeLetra, tamanhoFonte, cor);

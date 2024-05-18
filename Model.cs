@@ -4,7 +4,7 @@ using PdfSharp.Drawing;
 
 namespace CriarPDF
 {
-    class Model
+    class Model : IModel
     {
         private bool estadoAtualDocumento;
 

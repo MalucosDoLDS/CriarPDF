@@ -1,11 +1,12 @@
-﻿using System;
+﻿// No arquivo View.cs
+
+using System;
 
 namespace CriarPDF
 {
-    class View
+    public class View : IView
     {
-        public delegate void SolicitacaoGerarPDF(string texto, string tipoDeLetra, int tamanhoFonte, string cor, string caminho);
-        public event SolicitacaoGerarPDF? PrecisaGerarPDF;
+        public event EventHandler<SolicitacaoGerarPDFEventArgs>? PrecisaGerarPDF;
 
         public void ApresentarBoasVindas()
         {
@@ -24,7 +25,13 @@ namespace CriarPDF
             }
 
             string caminho = SolicitarCaminhoPDF();
-            PrecisaGerarPDF?.Invoke(texto, tipoDeLetraEscolhido, tamanhoFonte, cor, caminho);
+            var args = new SolicitacaoGerarPDFEventArgs(texto, tipoDeLetraEscolhido, tamanhoFonte, cor, caminho);
+            OnPrecisaGerarPDF(args);
+        }
+
+        public void ExibirPDFGerado(string caminho)
+        {
+            Console.WriteLine($"PDF criado com sucesso em: {caminho}");
         }
 
         private bool DesejaAcrescentarMaisTexto()
@@ -85,9 +92,11 @@ namespace CriarPDF
             return (tipoDeLetraEscolhido, tamanhoFonte, cor);
         }
 
-        public void ExibirPDFGerado(string caminho)
+        protected virtual void OnPrecisaGerarPDF(SolicitacaoGerarPDFEventArgs e)
         {
-            Console.WriteLine($"PDF criado com sucesso em: {caminho}");
+            PrecisaGerarPDF?.Invoke(this, e);
         }
     }
 }
+
+
