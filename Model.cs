@@ -1,11 +1,13 @@
 ﻿using System;
-using System.IO;
-using PdfSharp.Pdf;
+using System.Collections.Generic;
+using System.Drawing;
 using PdfSharp.Drawing;
+using PdfSharp.Drawing.Layout;
+using PdfSharp.Pdf;
 
 namespace CriarPDF
 {
-    class Model : IModel
+    public class Model : IModel
     {
         private bool estadoAtualDocumento;
 
@@ -21,37 +23,51 @@ namespace CriarPDF
                 PdfDocument document = new PdfDocument();
                 PdfPage currentPage = AddPage(document);
                 XGraphics gfx = XGraphics.FromPdfPage(currentPage);
+
                 XRect rect = new XRect(40, 40, currentPage.Width - 80, currentPage.Height - 80);
+                double currentYPosition = rect.Top;
 
                 foreach (var elemento in elementos)
                 {
                     if (elemento.Tipo == TipoElemento.Texto)
                     {
-                        string texto = elemento.Conteudo;
                         XFont font = new XFont(elemento.TipoDeLetra, elemento.TamanhoFonte);
-                        XBrush brush = GetXBrush(elemento.Cor);
-
-                        int index = 0;
-                        while (index < texto.Length)
+                        var tf = new XTextFormatter(gfx)
                         {
-                            string line = GetNextLine(texto, index, font, rect.Width);
-                            if (gfx.MeasureString(line, font).Height + rect.Top > currentPage.Height - 80)
+                            Alignment = XParagraphAlignment.Left
+                        };
+
+                        double height = gfx.MeasureString(elemento.Texto, font).Height;
+
+                        // Divide o texto em linhas que cabem na largura da página
+                        var lines = BreakTextIntoLines(elemento.Texto, font, gfx, rect.Width);
+                        foreach (var line in lines)
+                        {
+                            if (currentYPosition + height > rect.Bottom)
                             {
                                 currentPage = AddPage(document);
                                 gfx = XGraphics.FromPdfPage(currentPage);
-                                rect = new XRect(40, 40, currentPage.Width - 80, currentPage.Height - 80);
+                                currentYPosition = rect.Top;
                             }
 
-                            gfx.DrawString(line, font, brush, rect, XStringFormats.TopLeft);
-                            rect = new XRect(rect.Left, rect.Top + font.Height, rect.Width, rect.Height);
-                            index += line.Length;
+                            tf.DrawString(line, font, GetXBrush(elemento.Cor), new XRect(rect.Left, currentYPosition, rect.Width, height));
+                            currentYPosition += height;
                         }
                     }
                     else if (elemento.Tipo == TipoElemento.Imagem)
                     {
-                        XImage image = XImage.FromFile(elemento.Conteudo);
-                        gfx.DrawImage(image, rect.Left, rect.Top, rect.Width, rect.Height);
-                        rect = new XRect(rect.Left, rect.Top + image.PixelHeight, rect.Width, rect.Height);
+                        XImage image = XImage.FromFile(elemento.CaminhoImagem);
+                        SizeF imageSize = GetImageSize(image, elemento.TamanhoImagem, currentPage);
+
+                        if (currentYPosition + imageSize.Height > rect.Bottom)
+                        {
+                            currentPage = AddPage(document);
+                            gfx = XGraphics.FromPdfPage(currentPage);
+                            currentYPosition = rect.Top;
+                        }
+
+                        gfx.DrawImage(image, rect.Left, currentYPosition, imageSize.Width, imageSize.Height);
+                        currentYPosition += imageSize.Height;
                     }
                 }
 
@@ -68,34 +84,21 @@ namespace CriarPDF
 
         private PdfPage AddPage(PdfDocument document)
         {
-            PdfPage page = document.AddPage();
-            return page;
+            return document.AddPage();
         }
 
-        private string GetNextLine(string text, int startIndex, XFont font, double maxWidth)
+        private SizeF GetImageSize(XImage image, string tamanhoImagem, PdfPage page)
         {
-            string line = "";
-            int index = startIndex;
-            while (index < text.Length && GetStringSize(line + text[index], font).Width < maxWidth)
+            float maxWidth = (float)page.Width - 80;
+            float maxHeight = (float)page.Height - 80;
+
+            return tamanhoImagem switch
             {
-                line += text[index];
-                index++;
-            }
-            return line.TrimEnd();
-        }
-
-        private XSize GetStringSize(string text, XFont font)
-        {
-            using (XGraphics gfx = XGraphics.CreateMeasureContext(new XSize(1000, 1000), XGraphicsUnit.Point, XPageDirection.Downwards))
-            {
-                XSize size = gfx.MeasureString(text, font);
-                return size;
-            }
-        }
-
-        public bool DocumentoFoiGerado()
-        {
-            return estadoAtualDocumento;
+                "Pequena" => new SizeF(maxWidth / 4, maxHeight / 4),
+                "Média" => new SizeF(maxWidth / 2, maxHeight / 2),
+                "Grande" => new SizeF(maxWidth, maxHeight),
+                _ => new SizeF(maxWidth / 2, maxHeight / 2)
+            };
         }
 
         private XBrush GetXBrush(string cor)
@@ -111,8 +114,43 @@ namespace CriarPDF
                 "7" => XBrushes.Red,
                 "8" => XBrushes.Brown,
                 "9" => XBrushes.Blue,
-                _ => XBrushes.Black,
+                _ => XBrushes.Black
             };
+        }
+
+        public bool DocumentoFoiGerado()
+        {
+            return estadoAtualDocumento;
+        }
+
+        private List<string> BreakTextIntoLines(string text, XFont font, XGraphics gfx, double maxWidth)
+        {
+            var words = text.Split(' ');
+            var lines = new List<string>();
+            var currentLine = string.Empty;
+
+            foreach (var word in words)
+            {
+                var testLine = string.IsNullOrEmpty(currentLine) ? word : $"{currentLine} {word}";
+                var size = gfx.MeasureString(testLine, font);
+
+                if (size.Width < maxWidth)
+                {
+                    currentLine = testLine;
+                }
+                else
+                {
+                    lines.Add(currentLine);
+                    currentLine = word;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(currentLine))
+            {
+                lines.Add(currentLine);
+            }
+
+            return lines;
         }
     }
 }

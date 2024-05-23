@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace CriarPDF
 {
     public class View : IView
     {
-        public event EventHandler<SolicitacaoGerarPDFEventArgs> PrecisaGerarPDF;
+        public event EventHandler<SolicitacaoGerarPDFEventArgs>? PrecisaGerarPDF;
 
         public void ApresentarBoasVindas()
         {
@@ -14,7 +13,7 @@ namespace CriarPDF
 
         public void GerarPDF()
         {
-            List<ElementoPDF> elementos = new List<ElementoPDF>();
+            var elementos = new List<ElementoPDF>();
             bool continuar = true;
 
             while (continuar)
@@ -24,18 +23,18 @@ namespace CriarPDF
 
                 if (escolha == "T")
                 {
-                    var elemento = CriarElementoTexto();
-                    elementos.Add(elemento);
+                    string texto = DigitarInformacoes();
+                    (string tipoDeLetraEscolhido, int tamanhoFonte, string cor) = EscolherTipoDeLetraTamanhoECor();
+                    elementos.Add(new ElementoPDF(texto, tipoDeLetraEscolhido, tamanhoFonte, cor));
                 }
                 else if (escolha == "I")
                 {
-                    var elemento = CriarElementoImagem();
-                    elementos.Add(elemento);
+                    string caminhoImagem = SolicitarCaminhoImagem();
+                    string tamanhoImagem = EscolherTamanhoImagem();
+                    elementos.Add(new ElementoPDF(caminhoImagem, tamanhoImagem));
                 }
 
-                Console.WriteLine("Deseja adicionar mais texto ou imagem? (S/N)");
-                string resposta = Console.ReadLine().Trim().ToUpper();
-                continuar = resposta == "S";
+                continuar = DesejaAdicionarMaisElementos();
             }
 
             string caminho = SolicitarCaminhoPDF();
@@ -48,30 +47,34 @@ namespace CriarPDF
             Console.WriteLine($"PDF criado com sucesso em: {caminho}");
         }
 
-        private ElementoPDF CriarElementoTexto()
+        private bool DesejaAdicionarMaisElementos()
         {
-            string texto = DigitarInformacoes();
-            (string tipoDeLetraEscolhido, int tamanhoFonte, string cor) = EscolherTipoDeLetraTamanhoECor();
-
-            return new ElementoPDF
-            {
-                Tipo = TipoElemento.Texto,
-                Conteudo = texto,
-                TipoDeLetra = tipoDeLetraEscolhido,
-                TamanhoFonte = tamanhoFonte,
-                Cor = cor
-            };
+            Console.WriteLine("Deseja adicionar mais algum elemento? (S/N)");
+            string resposta = Console.ReadLine().ToUpper();
+            return resposta == "S";
         }
 
-        private ElementoPDF CriarElementoImagem()
+        private string SolicitarCaminhoImagem()
         {
-            Console.WriteLine("Insira o caminho da imagem:");
-            string caminhoImagem = Console.ReadLine();
+            Console.WriteLine("Por favor, insira o caminho da imagem:");
+            Console.Write("> ");
+            return Console.ReadLine();
+        }
 
-            return new ElementoPDF
+        private string EscolherTamanhoImagem()
+        {
+            Console.WriteLine("Escolha o tamanho da imagem:");
+            Console.WriteLine("1. Pequena");
+            Console.WriteLine("2. Média");
+            Console.WriteLine("3. Grande");
+            Console.Write("Tamanho da imagem (1-3): ");
+            string tamanhoImagem = Console.ReadLine();
+            return tamanhoImagem switch
             {
-                Tipo = TipoElemento.Imagem,
-                Conteudo = caminhoImagem
+                "1" => "Pequena",
+                "2" => "Média",
+                "3" => "Grande",
+                _ => "Média"
             };
         }
 
