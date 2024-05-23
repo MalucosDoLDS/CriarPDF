@@ -37,14 +37,14 @@ namespace CriarPDF
                             Alignment = XParagraphAlignment.Left
                         };
 
-                        double height = gfx.MeasureString(elemento.Texto, font).Height;
-
-                        // Divide o texto em linhas que cabem na largura da página
                         var lines = BreakTextIntoLines(elemento.Texto, font, gfx, rect.Width);
                         foreach (var line in lines)
                         {
+                            double height = gfx.MeasureString(line, font).Height;
+
                             if (currentYPosition + height > rect.Bottom)
                             {
+                                AddPageFooter(gfx, document.PageCount);
                                 currentPage = AddPage(document);
                                 gfx = XGraphics.FromPdfPage(currentPage);
                                 currentYPosition = rect.Top;
@@ -53,7 +53,8 @@ namespace CriarPDF
                             tf.DrawString(line, font, GetXBrush(elemento.Cor), new XRect(rect.Left, currentYPosition, rect.Width, height));
                             currentYPosition += height;
                         }
-                    }
+                    
+                }
                     else if (elemento.Tipo == TipoElemento.Imagem)
                     {
                         XImage image = XImage.FromFile(elemento.CaminhoImagem);
@@ -61,15 +62,19 @@ namespace CriarPDF
 
                         if (currentYPosition + imageSize.Height > rect.Bottom)
                         {
+                            AddPageFooter(gfx, document.PageCount);
                             currentPage = AddPage(document);
                             gfx = XGraphics.FromPdfPage(currentPage);
                             currentYPosition = rect.Top;
                         }
 
-                        gfx.DrawImage(image, rect.Left, currentYPosition, imageSize.Width, imageSize.Height);
+                        double centerX = (currentPage.Width - imageSize.Width) / 2;
+                        gfx.DrawImage(image, centerX, currentYPosition, imageSize.Width, imageSize.Height);
                         currentYPosition += imageSize.Height;
                     }
                 }
+
+                AddPageFooter(gfx, document.PageCount); // Add footer for the last page
 
                 document.Save(caminho);
                 estadoAtualDocumento = true;
@@ -151,6 +156,15 @@ namespace CriarPDF
             }
 
             return lines;
+        }
+
+        private void AddPageFooter(XGraphics gfx, int pageNumber)
+        {
+            XFont footerFont = new XFont("Arial", 10);
+            string footerText = $"Page {pageNumber}";
+            XRect footerRect = new XRect(0, gfx.PageSize.Height - 30, gfx.PageSize.Width, 20);
+
+            gfx.DrawString(footerText, footerFont, XBrushes.Black, footerRect, XStringFormats.Center);
         }
     }
 }
