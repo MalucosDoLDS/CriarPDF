@@ -19,7 +19,6 @@ namespace CriarPDF
         {
             view.ApresentarBoasVindas();
 
-            // Loop para permitir a geração contínua de PDFs até que o usuário decida sair
             bool continuar = true;
             while (continuar)
             {
@@ -32,15 +31,11 @@ namespace CriarPDF
         {
             try
             {
-                string texto = e.Texto;
-                string tipoDeLetra = e.TipoDeLetra;
-                int tamanhoFonte = e.TamanhoFonte;
-                string cor = e.Cor;
                 string caminho = e.Caminho;
 
                 if (ValidarCaminho(caminho))
                 {
-                    bool success = model.GerarPDF(texto, caminho, tipoDeLetra, tamanhoFonte, cor);
+                    bool success = model.GerarPDF(e.Elementos, caminho);
                     if (success)
                     {
                         view.ExibirPDFGerado(caminho);
@@ -66,7 +61,6 @@ namespace CriarPDF
             return Path.IsPathRooted(caminho) && !Path.GetInvalidPathChars().Any(caminho.Contains) && !Directory.Exists(caminho);
         }
 
-        // Método para perguntar se o usuário deseja continuar gerando PDFs
         private bool PerguntarSeContinuar()
         {
             Console.WriteLine("Deseja gerar outro documento PDF? (S/N)");

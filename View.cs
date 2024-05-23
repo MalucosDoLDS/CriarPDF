@@ -1,12 +1,11 @@
-﻿// No arquivo View.cs
-
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CriarPDF
 {
     public class View : IView
     {
-        public event EventHandler<SolicitacaoGerarPDFEventArgs>? PrecisaGerarPDF;
+        public event EventHandler<SolicitacaoGerarPDFEventArgs> PrecisaGerarPDF;
 
         public void ApresentarBoasVindas()
         {
@@ -15,17 +14,32 @@ namespace CriarPDF
 
         public void GerarPDF()
         {
-            string texto = DigitarInformacoes();
-            (string tipoDeLetraEscolhido, int tamanhoFonte, string cor) = EscolherTipoDeLetraTamanhoECor();
+            List<ElementoPDF> elementos = new List<ElementoPDF>();
+            bool continuar = true;
 
-            if (DesejaAcrescentarMaisTexto())
+            while (continuar)
             {
-                texto += "\n";
-                texto += DigitarInformacoesAdicionais();
+                Console.WriteLine("Deseja adicionar texto ou imagem? (T/I)");
+                string escolha = Console.ReadLine().Trim().ToUpper();
+
+                if (escolha == "T")
+                {
+                    var elemento = CriarElementoTexto();
+                    elementos.Add(elemento);
+                }
+                else if (escolha == "I")
+                {
+                    var elemento = CriarElementoImagem();
+                    elementos.Add(elemento);
+                }
+
+                Console.WriteLine("Deseja adicionar mais texto ou imagem? (S/N)");
+                string resposta = Console.ReadLine().Trim().ToUpper();
+                continuar = resposta == "S";
             }
 
             string caminho = SolicitarCaminhoPDF();
-            var args = new SolicitacaoGerarPDFEventArgs(texto, tipoDeLetraEscolhido, tamanhoFonte, cor, caminho);
+            var args = new SolicitacaoGerarPDFEventArgs(elementos.ToArray(), caminho);
             OnPrecisaGerarPDF(args);
         }
 
@@ -34,16 +48,36 @@ namespace CriarPDF
             Console.WriteLine($"PDF criado com sucesso em: {caminho}");
         }
 
-        private bool DesejaAcrescentarMaisTexto()
+        private ElementoPDF CriarElementoTexto()
         {
-            Console.WriteLine("Deseja acrescentar mais algum texto? (S/N)");
-            string resposta = Console.ReadLine().ToUpper();
-            return resposta == "S";
+            string texto = DigitarInformacoes();
+            (string tipoDeLetraEscolhido, int tamanhoFonte, string cor) = EscolherTipoDeLetraTamanhoECor();
+
+            return new ElementoPDF
+            {
+                Tipo = TipoElemento.Texto,
+                Conteudo = texto,
+                TipoDeLetra = tipoDeLetraEscolhido,
+                TamanhoFonte = tamanhoFonte,
+                Cor = cor
+            };
+        }
+
+        private ElementoPDF CriarElementoImagem()
+        {
+            Console.WriteLine("Insira o caminho da imagem:");
+            string caminhoImagem = Console.ReadLine();
+
+            return new ElementoPDF
+            {
+                Tipo = TipoElemento.Imagem,
+                Conteudo = caminhoImagem
+            };
         }
 
         private string SolicitarCaminhoPDF()
         {
-            Console.WriteLine("Por favor, insira o caminho onde deseja salvar o arquivo PDF, escreva <nome>.pdf':");
+            Console.WriteLine("Por favor, insira o caminho onde deseja salvar o arquivo PDF, escreva <nome>.pdf:");
             Console.Write("> ");
             return Console.ReadLine();
         }
@@ -51,12 +85,6 @@ namespace CriarPDF
         private string DigitarInformacoes()
         {
             Console.WriteLine("Digite o texto para o PDF:");
-            return Console.ReadLine();
-        }
-
-        private string DigitarInformacoesAdicionais()
-        {
-            Console.WriteLine("Digite o texto adicional para o PDF:");
             return Console.ReadLine();
         }
 
@@ -98,5 +126,6 @@ namespace CriarPDF
         }
     }
 }
+
 
 

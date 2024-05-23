@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
 
@@ -10,54 +11,48 @@ namespace CriarPDF
 
         public Model()
         {
-            estadoAtualDocumento = false;  // Inicializa o estado do documento como não gerado.
+            estadoAtualDocumento = false;
         }
 
-        // Método para gerar um PDF com o texto fornecido e salvar no caminho especificado, com o tipo de letra, tamanho da fonte e cor escolhidos.
-        public bool GerarPDF(string texto, string caminho, string tipoDeLetra, int tamanhoFonte, string cor)
+        public bool GerarPDF(ElementoPDF[] elementos, string caminho)
         {
             try
             {
                 PdfDocument document = new PdfDocument();
-                PdfPage currentPage = AddPage(document); // Adiciona a primeira página
+                PdfPage currentPage = AddPage(document);
                 XGraphics gfx = XGraphics.FromPdfPage(currentPage);
-
-                // Combinação manual de estilos de fonte para simular "BoldItalic"
-                XFont font;
-                switch (tipoDeLetra)
-                {
-                    case "1":
-                        font = new XFont("Verdana", tamanhoFonte);
-                        break;
-                    case "2":
-                        font = new XFont("Arial", tamanhoFonte);
-                        break;
-                    case "3":
-                        font = new XFont("Times New Roman", tamanhoFonte);
-                        break;
-                    default:
-                        font = new XFont("Verdana", tamanhoFonte);
-                        break;
-                }
-
-                // Define as margens da página
                 XRect rect = new XRect(40, 40, currentPage.Width - 80, currentPage.Height - 80);
 
-                // Divide o texto em partes para caber nas páginas
-                int index = 0;
-                while (index < texto.Length)
+                foreach (var elemento in elementos)
                 {
-                    string line = GetNextLine(texto, index, font, rect.Width);
-                    if (gfx.MeasureString(line, font).Height + rect.Top > currentPage.Height - 80) // Verifica se a linha cabe na página atual
+                    if (elemento.Tipo == TipoElemento.Texto)
                     {
-                        currentPage = AddPage(document); // Se não couber, adiciona uma nova página
-                        gfx = XGraphics.FromPdfPage(currentPage);
-                        rect = new XRect(40, 40, currentPage.Width - 80, currentPage.Height - 80);
-                    }
+                        string texto = elemento.Conteudo;
+                        XFont font = new XFont(elemento.TipoDeLetra, elemento.TamanhoFonte);
+                        XBrush brush = GetXBrush(elemento.Cor);
 
-                    gfx.DrawString(line, font, GetXBrush(cor), rect, XStringFormats.TopLeft);
-                    rect = new XRect(rect.Left, rect.Top + font.Height, rect.Width, rect.Height);
-                    index += line.Length;
+                        int index = 0;
+                        while (index < texto.Length)
+                        {
+                            string line = GetNextLine(texto, index, font, rect.Width);
+                            if (gfx.MeasureString(line, font).Height + rect.Top > currentPage.Height - 80)
+                            {
+                                currentPage = AddPage(document);
+                                gfx = XGraphics.FromPdfPage(currentPage);
+                                rect = new XRect(40, 40, currentPage.Width - 80, currentPage.Height - 80);
+                            }
+
+                            gfx.DrawString(line, font, brush, rect, XStringFormats.TopLeft);
+                            rect = new XRect(rect.Left, rect.Top + font.Height, rect.Width, rect.Height);
+                            index += line.Length;
+                        }
+                    }
+                    else if (elemento.Tipo == TipoElemento.Imagem)
+                    {
+                        XImage image = XImage.FromFile(elemento.Conteudo);
+                        gfx.DrawImage(image, rect.Left, rect.Top, rect.Width, rect.Height);
+                        rect = new XRect(rect.Left, rect.Top + image.PixelHeight, rect.Width, rect.Height);
+                    }
                 }
 
                 document.Save(caminho);
@@ -71,14 +66,12 @@ namespace CriarPDF
             }
         }
 
-        // Adiciona uma nova página ao documento
         private PdfPage AddPage(PdfDocument document)
         {
             PdfPage page = document.AddPage();
             return page;
         }
 
-        // Método auxiliar para obter a próxima linha de texto que cabe na largura especificada
         private string GetNextLine(string text, int startIndex, XFont font, double maxWidth)
         {
             string line = "";
@@ -91,7 +84,6 @@ namespace CriarPDF
             return line.TrimEnd();
         }
 
-        // Método auxiliar para obter a largura do texto
         private XSize GetStringSize(string text, XFont font)
         {
             using (XGraphics gfx = XGraphics.CreateMeasureContext(new XSize(1000, 1000), XGraphicsUnit.Point, XPageDirection.Downwards))
@@ -101,38 +93,26 @@ namespace CriarPDF
             }
         }
 
-        // Método para verificar se um documento PDF foi gerado.
         public bool DocumentoFoiGerado()
         {
             return estadoAtualDocumento;
         }
 
-        // Método para obter a cor do texto
         private XBrush GetXBrush(string cor)
         {
-            switch (cor)
+            return cor switch
             {
-                case "1":
-                    return XBrushes.Black;
-                case "2":
-                    return XBrushes.Gray;
-                case "3":
-                    return XBrushes.Green;
-                case "4":
-                    return XBrushes.Orange;
-                case "5":
-                    return XBrushes.Yellow;
-                case "6":
-                    return XBrushes.Pink;
-                case "7":
-                    return XBrushes.Red;
-                case "8":
-                    return XBrushes.Brown;
-                case "9":
-                    return XBrushes.Blue;
-                default:
-                    return XBrushes.Black;
-            }
+                "1" => XBrushes.Black,
+                "2" => XBrushes.Gray,
+                "3" => XBrushes.Green,
+                "4" => XBrushes.Orange,
+                "5" => XBrushes.Yellow,
+                "6" => XBrushes.Pink,
+                "7" => XBrushes.Red,
+                "8" => XBrushes.Brown,
+                "9" => XBrushes.Blue,
+                _ => XBrushes.Black,
+            };
         }
     }
 }
